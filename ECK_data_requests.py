@@ -68,7 +68,7 @@ labdata_key_dict = {
 
 
 # 花式搜尋data
-def test():
+def get_all_labdata():
     dict = {}
     trs = soup.find_all(class_ = re.compile("^groupCode"))
     # print(trs)
@@ -77,63 +77,52 @@ def test():
         # print(labdata_name)
         datas = i.find_all("tbody")[1]
         data = datas.find_all("tr")
+        list_all = []
         for i in data:
             time = str(i.find_all("td")[1].text)
             value = str(i.find_all("td")[2].text)
             list = [value, time]
-        dict[labdata_name] = list
+            list_all.append(list)
+        dict[labdata_name] = list_all
         # print(list)
     # print(dict)
     all_data = json.dumps(dict, indent=4)
     print(all_data)
-    print(type(all_data))
 
-
-def get_all_labdata():
-    dict = {}
-    for labdata_name, labdata_code in labdata_key_dict.items():
-        print(labdata_name)
-        trs = soup.find(class_ = f"{labdata_code} groupCode")
-        # trs = soup.find(class_ = "C6308003 groupCode") # Hb的
-        try:
-            datas = trs.find_all("tbody")[1]
-            data = datas.find_all("tr")
-            for i in data:
-                time = str(i.find_all("td")[1].text)
-                value = str(i.find_all("td")[2].text)
-                print(value + " " + time)
-        except:
-            continue
 
 def get_last_labdata():
-    for labdata_name, labdata_code in labdata_key_dict.items():
-        print(labdata_name)
-        trs = soup.find(class_ = f"{labdata_code} groupCode")
-        try:
-            datas = trs.find_all("tbody")[1]
-            data = datas.find("tr")
-            time = str(data.find_all("td")[1].text)
-            value = str(data.find_all("td")[2].text)
-            print(value + " " + time)
-        except:
-            print("No data.")
+    dict = {}
+    trs = soup.find_all(class_ = re.compile("^groupCode"))
+    # print(trs)
+    for i in trs:
+        labdata_name = str(i.find("b").text).strip()
+        # print(labdata_name)
+        datas = i.find_all("tbody")[1]
+        data = datas.find_all("tr")[0] # 這行代表只取最新的值
+        time = str(data.find_all("td")[1].text)
+        value = str(data.find_all("td")[2].text)
+        list = [value, time]
+        dict[labdata_name] = list
+        # print(list)
+    # print(dict)
+    last_data = json.dumps(dict, indent = 4)
+    # print(last_data)
+    return last_data, dict
 
 def get_simple_labdata():
-    # soup = scrape_data(ChartNo)
+    dict_simple = {}
     simple_labdata_key_dict = {
         "GPT (ALT)": "C6309026", "Creatinine": "C6309015", "K": "C6309022", "Hb": "C6308003", "Platelet": "C6308006", "PT": "C6308026", "APTT": "C6308036"
     }
-    for labdata_name, labdata_code in simple_labdata_key_dict.items():
-        print(labdata_name)
-        try:
-            trs = soup.find(class_ = f"{labdata_code} groupCode")
-            datas = trs.find_all("tbody")[1]
-            data = datas.find("tr")
-            time = str(data.find_all("td")[1].text)
-            value = str(data.find_all("td")[2].text)
-            print(value + " " + time)
-        except:
-            print("No data.")
+    last_data, dict = get_last_labdata()
+    for labdata_name, labdata_value in simple_labdata_key_dict.items():
+        dict_simple[labdata_name] = dict[labdata_name]
+    # print(dict_simple)
+    simple_data = json.dumps(dict_simple, indent = 4)
+    print(simple_data)
+
+
+
 
 # for labdata_name, labdata_code in labdata_key_dict.items():
 #     # print(labdata_code)
@@ -150,10 +139,10 @@ def get_simple_labdata():
 ChartNo = "5426687"
 t1 = time.time()
 soup = scrape_data(ChartNo)
-# get_simple_labdata()
+get_simple_labdata()
 # get_last_labdata()
 # get_all_labdata()
-test()
+
 
 t2 = time.time()
 print("Time spend: ", t2-t1)
