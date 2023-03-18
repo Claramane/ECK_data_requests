@@ -33,21 +33,24 @@ def scrape_data(ChartNo):
     # print(f'{BW} kg')
 
     info = info.find_all("strong")
-    name = info[0].text
-    sex = info[2].text
+    name = str(info[0].text).strip()
+    sex = str(info[2].text)
     age = str(info[4].text).split("歲")[0]
-    print(name)
-    print(sex)
-    print(age)
-    # for i in info:
+    # print(name)
+    # print(sex)
+    # print(age)
 
-        # print(i.text)
+    dict = {
+        "Name" : name,
+        "Sex" : sex,
+        "Age" : age,
+        "BodyHeight" : BH,
+        "BodyWeight" : BW
+    }
+    patient_info = json.dumps(dict, indent=4, ensure_ascii=False).encode('utf-8')
+    patient_info = patient_info.decode()
 
-
-    # for i in info:
-        # name = i.text
-        # print(name)
-        # print(i.text)
+    print(patient_info)
 
     return soup
 
@@ -86,7 +89,8 @@ def get_all_labdata():
         dict[labdata_name] = list_all
         # print(list)
     # print(dict)
-    all_data = json.dumps(dict, indent=4)
+    all_data = json.dumps(dict, indent=4, ensure_ascii=False).encode('utf-8')
+    all_data = all_data.decode()
     print(all_data)
 
 
@@ -105,8 +109,9 @@ def get_last_labdata():
         dict[labdata_name] = list
         # print(list)
     # print(dict)
-    last_data = json.dumps(dict, indent = 4)
-    # print(last_data)
+    last_data = json.dumps(dict, indent = 4, ensure_ascii=False).encode('utf-8')
+    last_data = last_data.decode()
+    print(last_data)
     return last_data, dict
 
 def get_simple_labdata():
@@ -139,8 +144,8 @@ def get_simple_labdata():
 ChartNo = "5426687"
 t1 = time.time()
 soup = scrape_data(ChartNo)
-get_simple_labdata()
-# get_last_labdata()
+# get_simple_labdata()
+get_last_labdata()
 # get_all_labdata()
 
 
