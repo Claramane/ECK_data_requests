@@ -129,18 +129,47 @@ def get_simple_labdata():
 
 def get_image():
     dict_img = {}
-    trs = soup.find_all('tr', attrs={'data-xrayhead': re.compile("^p")})
-    for i in trs: 
+    radiation = soup.find_all('tr', attrs={'data-xrayhead': re.compile("^p")})
+    exam_img = soup.find_all('tr', attrs={'data-examhead': re.compile("^p")})
+    # print(radiation)
+
+    # 取得影像的psHash值
+    psHash = soup.find_all("script", text = re.compile(".*psHash.*", flags=re.DOTALL))[1].text
+    psHash = psHash.split("psHash")[1]
+    psHash = psHash.split("'")[1]
+    # print(psHash)
+    
+    for i in radiation: 
         accessionNumber = str(i.find_all("td")[0].text)
         exam_name = str(i.find_all("td")[1].text).strip()
         time = str(i.find_all("td")[2].text)
-        img_url = f"http://172.23.0.10/html5/ShowImage.html?psHash=12BA22714218875BF2492235060CAAD3:1:20230321:1003071042:0009485318:08:&accessionNumber={accessionNumber}"
+        img_url = f"http://172.23.0.10/html5/ShowImage.html?psHash={psHash}&accessionNumber={accessionNumber}"
+        report_url = f"http://172.20.110.185/home/XrayDataByApplyNo?applyNo={accessionNumber}"
         dict = {
+            "exam_name": exam_name,
             "accessionNumber": accessionNumber,
             "img_url": img_url,
+            "report_url": report_url,
             "time": time
         }
-        dict_img[exam_name] = dict
+        dict_img[accessionNumber] = dict
+
+    for i in exam_img:
+        accessionNumber = str(i.find_all("td")[0].text)
+        exam_name = str(i.find_all("td")[1].text).strip()
+        time = str(i.find_all("td")[3].text)
+        img_url = f"http://172.23.0.10/html5/ShowImage.html?psHash={psHash}&accessionNumber={accessionNumber}"
+        report_url = f"http://172.20.110.185/home/ExamDataByApplyNo?applyNo={accessionNumber}"
+        dict = {
+            "exam_name": exam_name,
+            "accessionNumber": accessionNumber,
+            "img_url": img_url,
+            "report_url": report_url,
+            "time": time
+        }
+        dict_img[accessionNumber] = dict
+
+
     dict_img = json.dumps(dict_img, indent = 4, ensure_ascii=False).encode('utf-8')
     dict_img = dict_img.decode()
     print(dict_img)
@@ -151,8 +180,9 @@ def get_image():
 # while True:
     # 病例號放這邊，補0到十個數字
     # 48251
+    # 5426687
     # ChartNo = input("請輸入病例號: ")
-ChartNo = "9485318"
+ChartNo = "5426687"
 t1 = time.time()
 soup, patient_info = scrape_data(ChartNo)
 get_image()
