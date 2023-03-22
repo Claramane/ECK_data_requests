@@ -123,7 +123,10 @@ def get_simple_labdata():
     }
     last_data, dict = get_last_labdata()
     for labdata_name, labdata_value in simple_labdata_key_dict.items():
-        dict_simple[labdata_name] = dict[labdata_name]
+        try:
+            dict_simple[labdata_name] = dict[labdata_name]
+        except:
+            dict_simple[labdata_name] = "Null"
     # print(dict_simple)
     simple_data = json.dumps(dict_simple, indent = 4)
     print(simple_data)
@@ -156,15 +159,19 @@ def get_image(ChartNo):
         img_url = f"http://172.23.0.10/html5/ShowImage.html?psHash={psHash}&accessionNumber={accessionNumber}"
         report_url = f"http://172.20.110.185/home/XrayDataByApplyNo?applyNo={accessionNumber}"
 
-        r = rs.get(report_url, headers = headers) # 取得報告中檢查的名稱
-        exam_name = BeautifulSoup(r.text, "lxml")
-        exam_name = str(exam_name.find("tbody").find_all("td")[1].text).strip()
+        r = rs.get(report_url, headers = headers) # 取得報告
+        report_content = BeautifulSoup(r.text, "lxml")
+        # print(report_content)
+        exam_name = str(report_content.find("tbody").find_all("td")[1].text).strip()
+        report = str(report_content.find_all("pre")[0].text).strip()
+        impression = str(report_content.find_all("pre")[1].text).strip()
 
         dict = {
             "exam_name": exam_name,
             "accessionNumber": accessionNumber,
             "img_url": img_url,
-            # "report_url": report_url,
+            "report": report,
+            "impression": impression,
             "time": time
         }
         radiation_list.append(dict)
@@ -175,15 +182,22 @@ def get_image(ChartNo):
         time = str(i.find_all("td")[3].text)
         img_url = f"http://172.23.0.10/html5/ShowImage.html?psHash={psHash}&accessionNumber={accessionNumber}"
         report_url = f"http://172.20.110.185/home/ExamDataByApplyNo?applyNo={accessionNumber}"
+
+        r = rs.get(report_url, headers = headers) # 取得報告
+        report_content = BeautifulSoup(r.text, "lxml")
+        report = str(report_content.find_all("pre")[0].text).strip()
+        impression = str(report_content.find_all("pre")[1].text).strip()
         dict = {
             "exam_name": exam_name,
             "accessionNumber": accessionNumber,
             "img_url": img_url,
-            # "report_url": report_url,
+            "report": report,
+            "impression": impression,
             "time": time
         }
         exam_img_list.append(dict)
     img_list = radiation_list + exam_img_list # 合併放射影像和檢查影像
+    # print(img_list)
 
 
     for i in img_list: # 增加timestamp
@@ -212,7 +226,7 @@ def get_image(ChartNo):
     dict_img = json.dumps(dict_img, indent = 4, ensure_ascii = False).encode('utf-8')
     dict_img = dict_img.decode()
 
-    # print(dict_img)
+    print(dict_img)
 
 
 
@@ -223,7 +237,7 @@ def get_image(ChartNo):
     # 48251
     # 5426687
     # ChartNo = input("請輸入病例號: ")
-ChartNo = "3040936"
+ChartNo = "5426687"
 t1 = time.time()
 soup, patient_info = scrape_data(ChartNo)
 get_image(ChartNo)
