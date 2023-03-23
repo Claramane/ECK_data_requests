@@ -203,6 +203,7 @@ def get_image(ChartNo):
     for i in img_list: # 增加timestamp
         # 輸入民國紀年的時間字串
         minguo_str = i["time"]
+        # print(minguo_str)
         # 將民國紀年轉換為西元紀年
         year = int(minguo_str.split("/")[0]) + 1911
         month = int(minguo_str.split("/")[1])
@@ -211,13 +212,16 @@ def get_image(ChartNo):
         b = a.split(" ")[1]
         hour = int(b.split(":")[0])
         minute = int(b.split(":")[1])
-        timestamp = str(datetime.datetime(year, month, day, hour, minute).timestamp())
+        timestamp = str(datetime.datetime(year, month, day, hour, minute).timestamp()).split(".")[0]
+        timestamp = timestamp.zfill(11)
         i["timestamp"] = timestamp
+        # print(timestamp)
 
     def sort_time(element):
         return element["timestamp"]
 
-    img_list.sort(key=sort_time, reverse = True)
+    img_list.sort(key = sort_time, reverse = True)
+
 
     dict_img = {
         "Image": img_list
@@ -236,8 +240,11 @@ def get_image(ChartNo):
     # 病例號放這邊，補0到十個數字
     # 48251
     # 5426687
+    # 7782912
+    # 1676165
+    # 6279364
     # ChartNo = input("請輸入病例號: ")
-ChartNo = "5426687"
+ChartNo = "1676165"
 t1 = time.time()
 soup, patient_info = scrape_data(ChartNo)
 get_image(ChartNo)
