@@ -84,8 +84,9 @@ def get_all_labdata():
         list_all = []
         for i in data:
             time = str(i.find_all("td")[1].text)
-            value = str(i.find_all("td")[2].text)
-            list = [value, time]
+            value = str(i.find_all("td")[2].text) 
+            isNornal = i.find_all("td")[2].get("class")[0]
+            list = [value, time, isNornal]
             list_all.append(list)
         dict[labdata_name] = list_all
         # print(list)
@@ -107,7 +108,8 @@ def get_last_labdata():
         data = datas.find_all("tr")[0] # 這行代表只取最新的值
         time = str(data.find_all("td")[1].text)
         value = str(data.find_all("td")[2].text)
-        list = [value, time]
+        isNornal = i.find_all("td")[2].get("class")[0]
+        list = [value, time, isNornal]
         dict[labdata_name] = list
         # print(list)
     # print(dict)
@@ -213,7 +215,7 @@ def get_image(ChartNo):
         hour = int(b.split(":")[0])
         minute = int(b.split(":")[1])
         timestamp = str(datetime.datetime(year, month, day, hour, minute).timestamp()).split(".")[0]
-        timestamp = timestamp.zfill(11)
+        timestamp = timestamp.zfill(11) # 不然等等在sort的時候會有問題
         i["timestamp"] = timestamp
         # print(timestamp)
 
@@ -244,12 +246,13 @@ def get_image(ChartNo):
     # 1676165
     # 6279364
     # ChartNo = input("請輸入病例號: ")
-ChartNo = "1676165"
+ChartNo = "2310714"
 t1 = time.time()
 soup, patient_info = scrape_data(ChartNo)
-get_image(ChartNo)
+# get_image(ChartNo)
 # get_simple_labdata()
 # get_last_labdata()
+get_all_labdata()
 # data = get_all_labdata()
 # data = json.loads(data)
 # print(data["Hb"])
