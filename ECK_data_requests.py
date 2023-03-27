@@ -108,7 +108,11 @@ def get_last_labdata():
         data = datas.find_all("tr")[0] # 這行代表只取最新的值
         time = str(data.find_all("td")[1].text)
         value = str(data.find_all("td")[2].text)
-        isNornal = i.find_all("td")[2].get("class")[0]
+        isNornal = data.find_all("td")[2].get("class")[0]
+        # try:
+        #     isNornal = i.find_all("td")[2].get("class")[0]
+        # except:
+        #     isNornal = "Null"
         list = [value, time, isNornal]
         dict[labdata_name] = list
         # print(list)
@@ -156,24 +160,30 @@ def get_image(ChartNo):
 
     for i in radiation: 
         accessionNumber = str(i.find_all("td")[0].text)
-        # exam_cata = str(i.find_all("td")[1].text).strip()
+        exam_catalogy = str(i.find_all("td")[1].text).strip()
         time = str(i.find_all("td")[2].text)
         img_url = f"http://172.23.0.10/html5/ShowImage.html?psHash={psHash}&accessionNumber={accessionNumber}"
         report_url = f"http://172.20.110.185/home/XrayDataByApplyNo?applyNo={accessionNumber}"
 
-        r = rs.get(report_url, headers = headers) # 取得報告
-        report_content = BeautifulSoup(r.text, "lxml")
-        # print(report_content)
-        exam_name = str(report_content.find("tbody").find_all("td")[1].text).strip()
-        report = str(report_content.find_all("pre")[0].text).strip()
-        impression = str(report_content.find_all("pre")[1].text).strip()
+        def get_report():
+            r = rs.get(report_url, headers = headers) # 取得報告
+            report_content = BeautifulSoup(r.text, "lxml")
+            return report_content
+            # print(report_content)
+            
+        # report_content = get_report()
+        # exam_name = str(report_content.find("tbody").find_all("td")[1].text).strip()
+        # report = str(report_content.find_all("pre")[0].text).strip()
+        # impression = str(report_content.find_all("pre")[1].text).strip()
 
         dict = {
-            "exam_name": exam_name,
+            # "exam_name": exam_name,
+            "exam_catalogy": exam_catalogy,
             "accessionNumber": accessionNumber,
+            "report_url" : report_url,
             "img_url": img_url,
-            "report": report,
-            "impression": impression,
+            # "report": report,
+            # "impression": impression,
             "time": time
         }
         radiation_list.append(dict)
@@ -185,16 +195,22 @@ def get_image(ChartNo):
         img_url = f"http://172.23.0.10/html5/ShowImage.html?psHash={psHash}&accessionNumber={accessionNumber}"
         report_url = f"http://172.20.110.185/home/ExamDataByApplyNo?applyNo={accessionNumber}"
 
-        r = rs.get(report_url, headers = headers) # 取得報告
-        report_content = BeautifulSoup(r.text, "lxml")
-        report = str(report_content.find_all("pre")[0].text).strip()
-        impression = str(report_content.find_all("pre")[1].text).strip()
+        def get_report():
+            r = rs.get(report_url, headers = headers) # 取得報告
+            report_content = BeautifulSoup(r.text, "lxml")
+            return report_content
+        
+        # report_content = get_report()
+        # report = str(report_content.find_all("pre")[0].text).strip()
+        # impression = str(report_content.find_all("pre")[1].text).strip()
+        
         dict = {
             "exam_name": exam_name,
             "accessionNumber": accessionNumber,
             "img_url": img_url,
-            "report": report,
-            "impression": impression,
+            "report_url": report_url,
+            # "report": report,
+            # "impression": impression,
             "time": time
         }
         exam_img_list.append(dict)
@@ -246,13 +262,13 @@ def get_image(ChartNo):
     # 1676165
     # 6279364
     # ChartNo = input("請輸入病例號: ")
-ChartNo = "2310714"
+ChartNo = "6279364"
 t1 = time.time()
 soup, patient_info = scrape_data(ChartNo)
 # get_image(ChartNo)
 # get_simple_labdata()
-# get_last_labdata()
-get_all_labdata()
+get_last_labdata()
+# get_all_labdata()
 # data = get_all_labdata()
 # data = json.loads(data)
 # print(data["Hb"])
