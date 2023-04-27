@@ -93,7 +93,7 @@ def get_all_labdata():
     # print(dict)
     all_data = json.dumps(dict, indent=4, ensure_ascii=False).encode('utf-8')
     all_data = all_data.decode()
-    print(all_data)
+    # print(all_data)
     return all_data
 
 
@@ -135,7 +135,8 @@ def get_simple_labdata():
             dict_simple[labdata_name] = "Null"
     # print(dict_simple)
     simple_data = json.dumps(dict_simple, indent = 4)
-    print(simple_data)
+    return simple_data
+    # print(simple_data)
 
 def get_image(ChartNo):
     dict_img = {}
@@ -144,10 +145,10 @@ def get_image(ChartNo):
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36',
     }
     data = rs.get(f"http://172.20.110.185/login/RedirectHisCall?clerkid=MDIwMDM&chart={ChartNo}", headers = headers)
-
+    
     radiation = soup.find_all('tr', attrs={'data-xrayhead': re.compile("^p")})
     exam_img = soup.find_all('tr', attrs={'data-examhead': re.compile("^p")})
-    # print(radiation)
+    print(exam_img[0])
 
     # 取得影像的psHash值
     psHash = soup.find_all("script", text = re.compile(".*psHash.*", flags=re.DOTALL))[1].text
@@ -159,9 +160,10 @@ def get_image(ChartNo):
     exam_img_list = []
 
     for i in radiation: 
-        accessionNumber = str(i.find_all("td")[0].text)
-        exam_catalogy = str(i.find_all("td")[1].text).strip()
-        time = str(i.find_all("td")[2].text)
+        accessionNumber = str(i.find_all("td")[6].text)
+        exam_name = str(i.find("span").text)
+        # exam_catalogy = str(i.find_all("td")[1].text).strip()
+        time = str(i.find_all("td")[1].text)
         img_url = f"http://172.23.0.10/html5/ShowImage.html?psHash={psHash}&accessionNumber={accessionNumber}"
         report_url = f"http://172.20.110.185/home/XrayDataByApplyNo?applyNo={accessionNumber}"
 
@@ -177,21 +179,21 @@ def get_image(ChartNo):
         # impression = str(report_content.find_all("pre")[1].text).strip()
 
         dict = {
-            # "exam_name": exam_name,
-            "exam_catalogy": exam_catalogy,
+            "exam_name": exam_name,
             "accessionNumber": accessionNumber,
-            "report_url" : report_url,
             "img_url": img_url,
+            "report_url" : report_url,
             # "report": report,
             # "impression": impression,
             "time": time
         }
         radiation_list.append(dict)
-
+    # print(dict)
+    
     for i in exam_img:
-        accessionNumber = str(i.find_all("td")[0].text)
-        exam_name = str(i.find_all("td")[1].text).strip()
-        time = str(i.find_all("td")[3].text)
+        accessionNumber = str(i.find_all("td")[7].text)
+        exam_name = str(i.find_all("td")[0].text).strip()
+        time = str(i.find_all("td")[2].text)
         img_url = f"http://172.23.0.10/html5/ShowImage.html?psHash={psHash}&accessionNumber={accessionNumber}"
         report_url = f"http://172.20.110.185/home/ExamDataByApplyNo?applyNo={accessionNumber}"
 
@@ -221,7 +223,7 @@ def get_image(ChartNo):
     for i in img_list: # 增加timestamp
         # 輸入民國紀年的時間字串
         minguo_str = i["time"]
-        # print(minguo_str)
+        print(minguo_str)
         # 將民國紀年轉換為西元紀年
         year = int(minguo_str.split("/")[0]) + 1911
         month = int(minguo_str.split("/")[1])
@@ -249,6 +251,7 @@ def get_image(ChartNo):
     dict_img = dict_img.decode()
 
     print(dict_img)
+    return dict_img
 
 
 
@@ -262,12 +265,12 @@ def get_image(ChartNo):
     # 1676165
     # 6279364
     # ChartNo = input("請輸入病例號: ")
-ChartNo = "6279364"
+ChartNo = "4991040"
 t1 = time.time()
 soup, patient_info = scrape_data(ChartNo)
-# get_image(ChartNo)
+get_image(ChartNo)
 # get_simple_labdata()
-get_last_labdata()
+# get_last_labdata()
 # get_all_labdata()
 # data = get_all_labdata()
 # data = json.loads(data)
